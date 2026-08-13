@@ -10,7 +10,7 @@ A private Windows x64 WPF desktop GUI for downloading permitted web video or MP3
 - Progress bar, status, and live yt-dlp output
 - Cancellation support
 - MP4 video output
-- Bundled Windows x64 tools in release packages
+- Bundled Windows x64 tools in release packages (pinned and hash-verified)
 - Firefox cookies read locally through yt-dlp
 
 ## Firefox cookie note

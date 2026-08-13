@@ -8,7 +8,7 @@ $ProgressPreference = 'SilentlyContinue'
 
 $tools = @(
     @{ Name = 'yt-dlp.exe'; Url = 'https://github.com/yt-dlp/yt-dlp/releases/download/2026.07.04/yt-dlp.exe'; Sha256 = '52fe3c26dcf71fbdc85b528589020bb0b8e383155cfa81b64dd447bbe35e24b8' },
-    @{ Name = 'ffmpeg-master-latest-win64-gpl.zip'; Url = 'https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip'; Sha256 = '6c489ba508c1f4cfebf6bdd1c3be14ef73d55796bbaca82268295b21b3fff89b' },
+    @{ Name = 'ffmpeg-N-126061-g844e10e1a7-win64-gpl.zip'; Url = 'https://github.com/yt-dlp/FFmpeg-Builds/releases/download/autobuild-2026-08-11-18-08/ffmpeg-N-126061-g844e10e1a7-win64-gpl.zip'; Sha256 = 'cdb6000941ef5c3b39701202ae9acad12cb383f81c3309556cd2b035e56d348d' },
     @{ Name = 'deno-x86_64-pc-windows-msvc.zip'; Url = 'https://github.com/denoland/deno/releases/download/v2.9.5/deno-x86_64-pc-windows-msvc.zip'; Sha256 = '171efab55ac6b9881fd53ee4c20f8bf3bb1340ffc618483746909014db12216a' }
 )
 

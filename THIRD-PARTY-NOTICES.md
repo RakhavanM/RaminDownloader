@@ -11,6 +11,7 @@ License: Unlicense, with bundled third-party components as described by the upst
 
 Project: https://ffmpeg.org/
 Windows build source used for releases: https://github.com/yt-dlp/FFmpeg-Builds
+Pinned release asset: `ffmpeg-N-126061-g844e10e1a7-win64-gpl.zip` from the `autobuild-2026-08-11-18-08` release.
 License: The selected static build is distributed under the applicable FFmpeg/GPL notices. See the upstream build repository and FFmpeg documentation for the complete license text.
 
 ## Deno

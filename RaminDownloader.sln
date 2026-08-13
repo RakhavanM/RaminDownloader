@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{FB137E6C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RaminDownloader.Tests", "tests\RaminDownloader.Tests\RaminDownloader.Tests.csproj", "{D095FA27-3C01-4AF1-AF56-D57E3B9611F8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RaminYtDlpControl", "src\RaminYtDlpControl\RaminYtDlpControl.csproj", "{1D7BC596-F419-4914-9691-6DD533F0112A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,9 +30,14 @@ Global
 		{D095FA27-3C01-4AF1-AF56-D57E3B9611F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D095FA27-3C01-4AF1-AF56-D57E3B9611F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D095FA27-3C01-4AF1-AF56-D57E3B9611F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D7BC596-F419-4914-9691-6DD533F0112A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D7BC596-F419-4914-9691-6DD533F0112A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D7BC596-F419-4914-9691-6DD533F0112A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D7BC596-F419-4914-9691-6DD533F0112A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{143025DF-9529-4208-AF61-0CB0F55C3F39} = {A0A7AACE-1122-4F8F-A9D6-E0D303A823AA}
 		{D095FA27-3C01-4AF1-AF56-D57E3B9611F8} = {FB137E6C-3AC6-4615-B79D-5ABD7D50AD9E}
+		{1D7BC596-F419-4914-9691-6DD533F0112A} = {A0A7AACE-1122-4F8F-A9D6-E0D303A823AA}
 	EndGlobalSection
 EndGlobal

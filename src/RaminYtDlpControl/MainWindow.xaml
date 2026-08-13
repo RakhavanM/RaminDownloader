@@ -1,0 +1,136 @@
+<Window x:Class="RaminYtDlpControl.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Ramin yt-dlp Control Center" Width="1100" Height="820"
+        MinWidth="900" MinHeight="650" WindowStartupLocation="CenterScreen">
+    <DockPanel Margin="18">
+        <Border DockPanel.Dock="Bottom" BorderBrush="#C8C8C8" BorderThickness="1" Padding="10" Margin="0,12,0,0">
+            <StackPanel>
+                <TextBlock Text="Generated command preview" FontWeight="SemiBold" />
+                <TextBox x:Name="CommandPreviewTextBox" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" Height="58" VerticalScrollBarVisibility="Auto" Margin="0,6,0,0" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                    <Button x:Name="CancelButton" Content="Cancel" Width="100" Height="32" Margin="0,0,10,0" Click="CancelButton_Click" IsEnabled="False" />
+                    <Button x:Name="RunButton" Content="Run" Width="120" Height="32" Click="RunButton_Click" IsDefault="True" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <TextBlock DockPanel.Dock="Top" Text="Ramin yt-dlp Control Center" FontSize="25" FontWeight="SemiBold" Margin="0,0,0,12" />
+
+        <TabControl x:Name="OptionsTabControl">
+            <TabItem Header="General">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="180" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="URLs (one per line)" FontWeight="SemiBold" />
+                        <TextBox x:Name="UrlsTextBox" Grid.Row="1" Grid.ColumnSpan="2" Height="80" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Margin="0,5,0,12" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Output folder" VerticalAlignment="Center" Margin="0,0,8,10" />
+                        <TextBox x:Name="OutputFolderTextBox" Grid.Row="2" Grid.Column="1" Text="%(USERPROFILE)s\Downloads\RaminDownloader" Margin="0,0,0,10" />
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Output template" VerticalAlignment="Center" Margin="0,0,8,10" />
+                        <TextBox x:Name="OutputTemplateTextBox" Grid.Row="3" Grid.Column="1" Text="%(title)s [%(id)s].%(ext)s" Margin="0,0,0,10" />
+                        <CheckBox x:Name="FirefoxCookiesCheckBox" Grid.Row="4" Grid.ColumnSpan="2" IsChecked="True" Content="Use Firefox cookies automatically" Margin="0,0,0,10" />
+                        <CheckBox x:Name="NoPlaylistCheckBox" Grid.Row="5" Grid.ColumnSpan="2" IsChecked="True" Content="Do not download playlists" Margin="0,0,0,10" />
+                        <CheckBox x:Name="ArchiveCheckBox" Grid.Row="6" Grid.ColumnSpan="2" Content="Use download archive file" Margin="0,0,0,6" />
+                        <TextBox x:Name="ArchivePathTextBox" Grid.Row="7" Grid.ColumnSpan="2" Text="download-archive.txt" Margin="0,0,0,10" />
+                        <TextBlock Grid.Row="8" Grid.ColumnSpan="2" TextWrapping="Wrap" Foreground="#555">Firefox must be installed and signed in to the target website. Complete any verification in Firefox and close Firefox if its profile is locked. Cookies stay local.</TextBlock>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Format">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="180" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Format preset" VerticalAlignment="Center" Margin="0,0,8,10" />
+                        <ComboBox x:Name="FormatPresetComboBox" Grid.Row="0" Grid.Column="1" SelectedIndex="0" Margin="0,0,0,10">
+                            <ComboBoxItem Content="Best video + best audio" />
+                            <ComboBoxItem Content="Best MP4-compatible" />
+                            <ComboBoxItem Content="Audio only" />
+                            <ComboBoxItem Content="Custom format" />
+                        </ComboBox>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Custom format" VerticalAlignment="Center" Margin="0,0,8,10" />
+                        <TextBox x:Name="CustomFormatTextBox" Grid.Row="1" Grid.Column="1" Text="bestvideo*+bestaudio/best" Margin="0,0,0,10" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Merge format" VerticalAlignment="Center" Margin="0,0,8,10" />
+                        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
+                            <RadioButton x:Name="Mp4RadioButton" Content="MP4" IsChecked="True" GroupName="MergeFormat" Margin="0,0,18,0" />
+                            <RadioButton Content="MKV" GroupName="MergeFormat" Margin="0,0,18,0" />
+                            <RadioButton Content="WebM" GroupName="MergeFormat" />
+                        </StackPanel>
+                        <CheckBox x:Name="ExtractAudioCheckBox" Grid.Row="3" Grid.ColumnSpan="2" Content="Extract audio" Margin="0,0,0,10" />
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Audio format" VerticalAlignment="Center" Margin="0,0,8,10" />
+                        <ComboBox x:Name="AudioFormatComboBox" Grid.Row="4" Grid.Column="1" SelectedIndex="0" Margin="0,0,0,10">
+                            <ComboBoxItem Content="MP3" /><ComboBoxItem Content="M4A" /><ComboBoxItem Content="Opus" /><ComboBoxItem Content="FLAC" /><ComboBoxItem Content="WAV" />
+                        </ComboBox>
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Audio quality" VerticalAlignment="Center" Margin="0,0,8,10" />
+                        <ComboBox x:Name="AudioQualityComboBox" Grid.Row="5" Grid.Column="1" SelectedIndex="0" Margin="0,0,0,10">
+                            <ComboBoxItem Content="Best (0)" /><ComboBoxItem Content="Good (5)" /><ComboBoxItem Content="Smallest (9)" />
+                        </ComboBox>
+                        <CheckBox x:Name="EmbedMetadataCheckBox" Grid.Row="6" Grid.ColumnSpan="2" Content="Embed metadata" Margin="0,0,0,10" />
+                        <CheckBox x:Name="EmbedThumbnailCheckBox" Grid.Row="7" Grid.ColumnSpan="2" Content="Embed thumbnail" />
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Post-processing">
+                <StackPanel Margin="16">
+                    <CheckBox x:Name="WriteThumbnailCheckBox" Content="Write thumbnail" Margin="0,0,0,12" />
+                    <CheckBox x:Name="KeepVideoCheckBox" Content="Keep the original video after audio extraction" Margin="0,0,0,12" />
+                    <CheckBox x:Name="RemuxVideoCheckBox" Content="Remux video when possible" Margin="0,0,0,12" />
+                    <TextBlock Text="Post-processing options are applied after yt-dlp selects and downloads the media." TextWrapping="Wrap" Foreground="#555" />
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="Subtitles &amp; Metadata">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="180" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                    <CheckBox x:Name="WriteSubsCheckBox" Grid.Row="0" Grid.ColumnSpan="2" Content="Write subtitles" Margin="0,0,0,12" />
+                    <CheckBox x:Name="WriteAutoSubsCheckBox" Grid.Row="1" Grid.ColumnSpan="2" Content="Write automatically generated subtitles" Margin="0,0,0,12" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Subtitle languages" VerticalAlignment="Center" Margin="0,0,8,10" />
+                    <TextBox x:Name="SubtitleLanguagesTextBox" Grid.Row="2" Grid.Column="1" Text="en.*,fa" Margin="0,0,0,10" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Subtitle format" VerticalAlignment="Center" Margin="0,0,8,10" />
+                    <ComboBox x:Name="SubtitleFormatComboBox" Grid.Row="3" Grid.Column="1" SelectedIndex="0" Margin="0,0,0,10"><ComboBoxItem Content="Best" /><ComboBoxItem Content="SRT" /><ComboBoxItem Content="VTT" /><ComboBoxItem Content="ASS" /></ComboBox>
+                    <CheckBox x:Name="WriteDescriptionCheckBox" Grid.Row="4" Grid.ColumnSpan="2" Content="Write description" Margin="0,0,0,12" />
+                    <CheckBox x:Name="WriteInfoJsonCheckBox" Grid.Row="5" Grid.ColumnSpan="2" Content="Write info JSON" />
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Playlist">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="180" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Playlist start" VerticalAlignment="Center" Margin="0,0,8,10" /><TextBox x:Name="PlaylistStartTextBox" Grid.Row="0" Grid.Column="1" Margin="0,0,0,10" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Playlist end" VerticalAlignment="Center" Margin="0,0,8,10" /><TextBox x:Name="PlaylistEndTextBox" Grid.Row="1" Grid.Column="1" Margin="0,0,0,10" />
+                    <CheckBox x:Name="PlaylistReverseCheckBox" Grid.Row="2" Grid.ColumnSpan="2" Content="Reverse playlist" Margin="0,0,0,12" />
+                    <CheckBox x:Name="PlaylistRandomCheckBox" Grid.Row="3" Grid.ColumnSpan="2" Content="Random playlist order" />
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Network">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="180" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Proxy" VerticalAlignment="Center" Margin="0,0,8,10" /><TextBox x:Name="ProxyTextBox" Grid.Row="0" Grid.Column="1" Margin="0,0,0,10" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Rate limit" VerticalAlignment="Center" Margin="0,0,8,10" /><TextBox x:Name="RateLimitTextBox" Grid.Row="1" Grid.Column="1" ToolTip="Examples: 50K, 4.2M" Margin="0,0,0,10" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Retries" VerticalAlignment="Center" Margin="0,0,8,10" /><TextBox x:Name="RetriesTextBox" Grid.Row="2" Grid.Column="1" Text="10" Margin="0,0,0,10" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Fragment retries" VerticalAlignment="Center" Margin="0,0,8,10" /><TextBox x:Name="FragmentRetriesTextBox" Grid.Row="3" Grid.Column="1" Text="10" />
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Advanced">
+                <StackPanel Margin="16">
+                    <CheckBox x:Name="VerboseCheckBox" Content="Verbose output" Margin="0,0,0,12" />
+                    <TextBlock Text="Additional yt-dlp arguments" FontWeight="SemiBold" />
+                    <TextBox x:Name="AdditionalArgumentsTextBox" Height="120" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Margin="0,6,0,12" />
+                    <TextBlock TextWrapping="Wrap" Foreground="#9A5B00">Advanced arguments are appended to the generated command. Use only yt-dlp options you understand. Do not enter passwords, cookie contents, or untrusted scripts.</TextBlock>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>

@@ -36,13 +36,14 @@ dotnet test
 The release workflow fetches pinned, hash-verified Windows x64 binaries and publishes a ZIP containing:
 
 - One self-contained `RaminDownloader.exe`
+- One self-contained `RaminYtDlpControl.exe` companion control-center GUI
 - `tools/win-x64/yt-dlp.exe`
 - `tools/win-x64/ffmpeg.exe`
 - `tools/win-x64/ffprobe.exe`
 - `tools/win-x64/deno.exe`
 - third-party notices and checksums
 
-The application is published as a compressed single-file .NET executable. The
+Both applications are published as compressed single-file .NET executables. The
 yt-dlp, FFmpeg, FFprobe, and Deno executables remain separate because the app
 must launch them as external programs.
 

@@ -49,13 +49,12 @@
             </Border>
             <ProgressBar x:Name="DownloadProgressBar" Height="22" Minimum="0" Maximum="100" Margin="0,0,0,10" />
             <TextBlock x:Name="StatusTextBlock" Text="Ready" TextWrapping="Wrap" Margin="0,0,0,8" />
-            <TextBox x:Name="LogTextBox"
-                     IsReadOnly="True"
-                     AcceptsReturn="True"
-                     VerticalScrollBarVisibility="Auto"
-                     HorizontalScrollBarVisibility="Disabled"
-                     TextWrapping="Wrap"
-                     MinHeight="120" />
+            <Border BorderBrush="#D0D0D0" BorderThickness="1" Padding="8" MinHeight="70" MaxHeight="110">
+                <TextBlock x:Name="LatestOutputTextBlock"
+                           Text="Latest yt-dlp output will appear here."
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Center" />
+            </Border>
         </StackPanel>
 
         <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">

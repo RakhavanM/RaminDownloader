@@ -5,24 +5,26 @@ public sealed class UiPackagingContractTests
     private static readonly string RepositoryRoot = FindRepositoryRoot();
 
     [Fact]
-    public void MainWindowContainsPasteButtonRadioSelectorsAndScrollableLog()
+    public void MainWindowContainsPasteButtonRadioSelectorsAndScrollableLatestOutput()
     {
         var xaml = File.ReadAllText(Path.Combine(RepositoryRoot, "src", "RaminDownloader", "MainWindow.xaml"));
 
         Assert.Contains("PasteButton", xaml);
         Assert.Contains("RadioButton", xaml);
-        Assert.Contains("VerticalScrollBarVisibility=\"Auto\"", xaml);
-        Assert.Contains("HorizontalScrollBarVisibility=\"Disabled\"", xaml);
+        Assert.Contains("LatestOutputTextBlock", xaml);
+        Assert.DoesNotContain("LogTextBox", xaml);
+        Assert.Contains("MessageBox.Show", File.ReadAllText(Path.Combine(RepositoryRoot, "src", "RaminDownloader", "MainWindow.xaml.cs")));
     }
 
     [Fact]
-    public void MainWindowUsesClipboardPasteAndLogAutoScrollHandlers()
+    public void MainWindowUsesClipboardPasteAndLatestOutputUpdates()
     {
         var code = File.ReadAllText(Path.Combine(RepositoryRoot, "src", "RaminDownloader", "MainWindow.xaml.cs"));
 
         Assert.Contains("Clipboard.GetText", code);
-        Assert.Contains("LogTextBox.ScrollToEnd", code);
+        Assert.Contains("LatestOutputTextBlock.Text", code);
         Assert.Contains("PasteButton_Click", code);
+        Assert.DoesNotContain("LogTextBox", code);
     }
 
     [Fact]
@@ -33,6 +35,7 @@ public sealed class UiPackagingContractTests
 
         Assert.Contains("PublishSingleFile", project);
         Assert.Contains("IncludeNativeLibrariesForSelfExtract", project);
+        Assert.Contains("EnableCompressionInSingleFile", project);
         Assert.Contains("tools\\win-x64", package);
         Assert.Contains("RaminDownloader.exe", package);
     }

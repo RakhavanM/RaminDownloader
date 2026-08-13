@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
-using System.Windows.Controls;
 using RaminDownloader.Models;
 using RaminDownloader.Services;
 
@@ -44,19 +43,19 @@ public partial class MainWindow : Window
 
         SetBusy(true);
         DownloadProgressBar.Value = 0;
-        LogTextBox.Clear();
+        LatestOutputTextBlock.Text = "Starting yt-dlp...";
         _downloadCancellation = new CancellationTokenSource();
 
         try
         {
             var progress = new Progress<DownloadProgress>(update =>
             {
+                LatestOutputTextBlock.Text = update.Message;
                 if (update.Percent is { } percent)
                 {
                     DownloadProgressBar.Value = percent;
                     StatusTextBlock.Text = $"{percent:0.0}%";
                 }
-                AppendLogLine(update.Message);
             });
 
             var downloadDirectory = Path.Combine(
@@ -73,25 +72,33 @@ public partial class MainWindow : Window
             if (exitCode == 0)
             {
                 DownloadProgressBar.Value = 100;
-                StatusTextBlock.Text = $"Finished. Files are in {downloadDirectory}";
+                StatusTextBlock.Text = "Download complete.";
+                MessageBox.Show(
+                    this,
+                    $"Your download is complete.\n\nSaved to:\n{downloadDirectory}",
+                    "Download complete",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                ResetForm();
             }
             else
             {
-                StatusTextBlock.Text = $"yt-dlp ended with exit code {exitCode}. See the log for details.";
+                StatusTextBlock.Text = $"yt-dlp ended with exit code {exitCode}.";
             }
         }
         catch (OperationCanceledException)
         {
             StatusTextBlock.Text = "Download cancelled.";
+            LatestOutputTextBlock.Text = "Download cancelled.";
         }
         catch (Exception ex)
         {
             StatusTextBlock.Text = ex.Message;
-            AppendLogLine(ex.ToString());
+            LatestOutputTextBlock.Text = ex.Message;
         }
         finally
         {
-            _downloadCancellation.Dispose();
+            _downloadCancellation?.Dispose();
             _downloadCancellation = null;
             SetBusy(false);
         }
@@ -102,10 +109,14 @@ public partial class MainWindow : Window
         _downloadCancellation?.Cancel();
     }
 
-    private void AppendLogLine(string message)
+    private void ResetForm()
     {
-        LogTextBox.AppendText(message + Environment.NewLine);
-        LogTextBox.ScrollToEnd();
+        UrlTextBox.Clear();
+        VideoRadioButton.IsChecked = true;
+        HighestQualityRadioButton.IsChecked = true;
+        DownloadProgressBar.Value = 0;
+        StatusTextBlock.Text = "Ready";
+        LatestOutputTextBlock.Text = "Ready for the next download.";
     }
 
     private void SetBusy(bool busy)

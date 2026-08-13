@@ -7,7 +7,8 @@ A private Windows x64 WPF desktop GUI for downloading permitted web video or MP3
 - URL input and Download button
 - Video or Audio (MP3) selection
 - Highest, Medium, or Lowest quality selection
-- Progress bar, status, and auto-scrolling live yt-dlp output
+- Progress bar, status, and live latest yt-dlp output
+- Completion dialog followed by an automatic form reset
 - Clipboard Paste button for the URL
 - Cancellation support
 - MP4 video output
@@ -40,6 +41,10 @@ The release workflow fetches pinned, hash-verified Windows x64 binaries and publ
 - `tools/win-x64/ffprobe.exe`
 - `tools/win-x64/deno.exe`
 - third-party notices and checksums
+
+The application is published as a compressed single-file .NET executable. The
+yt-dlp, FFmpeg, FFprobe, and Deno executables remain separate because the app
+must launch them as external programs.
 
 The tools are release assets rather than normal Git history to keep the repository manageable. Never add browser profiles, cookies, passwords, or tokens to the repository or release.
 

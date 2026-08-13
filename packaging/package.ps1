@@ -37,6 +37,8 @@ Get-ChildItem $packageTools -Filter *.exe | Get-FileHash -Algorithm SHA256 | For
     "{0}  tools/win-x64/{1}" -f $_.Hash.ToLowerInvariant(), $_.Name
 } | Set-Content (Join-Path $packageRoot 'SHA256SUMS.txt')
 
+# Compress-Archive uses Deflate. Use the maximum level supported by the
+# Windows packaging cmdlet; the single-file app is already internally compressed.
 Compress-Archive -Path $packageRoot -DestinationPath $zip -CompressionLevel Optimal
 Get-FileHash $zip -Algorithm SHA256 | Format-List
 Write-Host "Created $zip"

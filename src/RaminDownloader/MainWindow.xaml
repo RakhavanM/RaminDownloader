@@ -21,20 +21,27 @@
         <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="RaminDownloader" FontSize="26" FontWeight="SemiBold" Margin="0,0,0,18" />
 
         <TextBlock Grid.Row="1" Grid.Column="0" Text="URL" VerticalAlignment="Center" Margin="0,0,14,12" />
-        <TextBox x:Name="UrlTextBox" Grid.Row="1" Grid.Column="1" Height="32" Margin="0,0,0,12" Padding="8,5" />
+        <Grid Grid.Row="1" Grid.Column="1" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="UrlTextBox" Grid.Column="0" Height="32" Padding="8,5" />
+            <Button x:Name="PasteButton" Grid.Column="1" Content="Paste" Width="90" Height="32" Margin="8,0,0,0" Click="PasteButton_Click" />
+        </Grid>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Text="Type" VerticalAlignment="Center" Margin="0,0,14,12" />
-        <ComboBox x:Name="TypeComboBox" Grid.Row="2" Grid.Column="1" Height="32" Margin="0,0,0,12" SelectedIndex="0">
-            <ComboBoxItem Content="Video" />
-            <ComboBoxItem Content="Audio (MP3)" />
-        </ComboBox>
+        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,12">
+            <RadioButton x:Name="VideoRadioButton" Content="Video" GroupName="DownloadType" IsChecked="True" Margin="0,0,20,0" />
+            <RadioButton x:Name="AudioRadioButton" Content="Audio (MP3)" GroupName="DownloadType" />
+        </StackPanel>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Text="Quality" VerticalAlignment="Center" Margin="0,0,14,12" />
-        <ComboBox x:Name="QualityComboBox" Grid.Row="3" Grid.Column="1" Height="32" Margin="0,0,0,12" SelectedIndex="0">
-            <ComboBoxItem Content="Highest" />
-            <ComboBoxItem Content="Medium" />
-            <ComboBoxItem Content="Lowest" />
-        </ComboBox>
+        <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,12">
+            <RadioButton x:Name="HighestQualityRadioButton" Content="Highest" GroupName="DownloadQuality" IsChecked="True" Margin="0,0,20,0" />
+            <RadioButton x:Name="MediumQualityRadioButton" Content="Medium" GroupName="DownloadQuality" Margin="0,0,20,0" />
+            <RadioButton x:Name="LowestQualityRadioButton" Content="Lowest" GroupName="DownloadQuality" />
+        </StackPanel>
 
         <StackPanel Grid.Row="4" Grid.ColumnSpan="2">
             <Border Background="#FFF5E6" BorderBrush="#FFE0A3" BorderThickness="1" Padding="12" Margin="0,4,0,14">
@@ -42,7 +49,13 @@
             </Border>
             <ProgressBar x:Name="DownloadProgressBar" Height="22" Minimum="0" Maximum="100" Margin="0,0,0,10" />
             <TextBlock x:Name="StatusTextBlock" Text="Ready" TextWrapping="Wrap" Margin="0,0,0,8" />
-            <TextBox x:Name="LogTextBox" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" MinHeight="120" />
+            <TextBox x:Name="LogTextBox"
+                     IsReadOnly="True"
+                     AcceptsReturn="True"
+                     VerticalScrollBarVisibility="Auto"
+                     HorizontalScrollBarVisibility="Disabled"
+                     TextWrapping="Wrap"
+                     MinHeight="120" />
         </StackPanel>
 
         <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">

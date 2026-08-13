@@ -7,7 +7,8 @@ A private Windows x64 WPF desktop GUI for downloading permitted web video or MP3
 - URL input and Download button
 - Video or Audio (MP3) selection
 - Highest, Medium, or Lowest quality selection
-- Progress bar, status, and live yt-dlp output
+- Progress bar, status, and auto-scrolling live yt-dlp output
+- Clipboard Paste button for the URL
 - Cancellation support
 - MP4 video output
 - Bundled Windows x64 tools in release packages (pinned and hash-verified)
@@ -31,9 +32,9 @@ dotnet test
 
 ## Release packaging
 
-The release workflow fetches pinned, hash-verified Windows x64 binaries and publishes a self-contained ZIP containing:
+The release workflow fetches pinned, hash-verified Windows x64 binaries and publishes a ZIP containing:
 
-- `RaminDownloader.exe` and its self-contained .NET files
+- One self-contained `RaminDownloader.exe`
 - `tools/win-x64/yt-dlp.exe`
 - `tools/win-x64/ffmpeg.exe`
 - `tools/win-x64/ffprobe.exe`

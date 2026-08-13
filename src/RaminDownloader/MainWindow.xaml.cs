@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using RaminDownloader.Models;
 using RaminDownloader.Services;
 
@@ -16,15 +17,24 @@ public partial class MainWindow : Window
         InitializeComponent();
     }
 
+    private void PasteButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (Clipboard.ContainsText())
+        {
+            UrlTextBox.Text = Clipboard.GetText();
+            UrlTextBox.Focus();
+            UrlTextBox.CaretIndex = UrlTextBox.Text.Length;
+        }
+    }
+
     private async void DownloadButton_Click(object sender, RoutedEventArgs e)
     {
-        var type = TypeComboBox.SelectedIndex == 1 ? DownloadType.AudioMp3 : DownloadType.Video;
-        var quality = QualityComboBox.SelectedIndex switch
-        {
-            1 => DownloadQuality.Medium,
-            2 => DownloadQuality.Lowest,
-            _ => DownloadQuality.Highest
-        };
+        var type = AudioRadioButton.IsChecked == true ? DownloadType.AudioMp3 : DownloadType.Video;
+        var quality = MediumQualityRadioButton.IsChecked == true
+            ? DownloadQuality.Medium
+            : LowestQualityRadioButton.IsChecked == true
+                ? DownloadQuality.Lowest
+                : DownloadQuality.Highest;
 
         if (!DownloadOptions.TryCreate(UrlTextBox.Text, type, quality, useFirefoxCookies: true, out var options) || options is null)
         {
@@ -46,8 +56,7 @@ public partial class MainWindow : Window
                     DownloadProgressBar.Value = percent;
                     StatusTextBlock.Text = $"{percent:0.0}%";
                 }
-                LogTextBox.AppendText(update.Message + Environment.NewLine);
-                LogTextBox.ScrollToEnd();
+                AppendLogLine(update.Message);
             });
 
             var downloadDirectory = Path.Combine(
@@ -78,7 +87,7 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             StatusTextBlock.Text = ex.Message;
-            LogTextBox.AppendText(ex + Environment.NewLine);
+            AppendLogLine(ex.ToString());
         }
         finally
         {
@@ -93,13 +102,23 @@ public partial class MainWindow : Window
         _downloadCancellation?.Cancel();
     }
 
+    private void AppendLogLine(string message)
+    {
+        LogTextBox.AppendText(message + Environment.NewLine);
+        LogTextBox.ScrollToEnd();
+    }
+
     private void SetBusy(bool busy)
     {
         DownloadButton.IsEnabled = !busy;
         CancelButton.IsEnabled = busy;
+        PasteButton.IsEnabled = !busy;
         UrlTextBox.IsEnabled = !busy;
-        TypeComboBox.IsEnabled = !busy;
-        QualityComboBox.IsEnabled = !busy;
+        VideoRadioButton.IsEnabled = !busy;
+        AudioRadioButton.IsEnabled = !busy;
+        HighestQualityRadioButton.IsEnabled = !busy;
+        MediumQualityRadioButton.IsEnabled = !busy;
+        LowestQualityRadioButton.IsEnabled = !busy;
     }
 
     protected override void OnClosing(CancelEventArgs e)

@@ -25,7 +25,8 @@ if ($LASTEXITCODE -ne 0) { throw 'tool download failed' }
 $packageRoot = Join-Path $OutputDirectory 'RaminDownloader'
 $packageTools = Join-Path $packageRoot 'tools\win-x64'
 New-Item -ItemType Directory -Path $packageTools -Force | Out-Null
-Copy-Item (Join-Path $publish '*') $packageRoot -Recurse -Force
+Copy-Item (Join-Path $publish 'RaminDownloader.exe') $packageRoot -Force
+if (-not (Test-Path (Join-Path $packageRoot 'RaminDownloader.exe'))) { throw 'The single-file executable was not produced.' }
 Copy-Item (Join-Path $tools '*.exe') $packageTools -Force
 Copy-Item (Join-Path $root 'README.md') $packageRoot -Force
 Copy-Item (Join-Path $root 'LICENSE') $packageRoot -Force

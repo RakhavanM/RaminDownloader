@@ -46,6 +46,10 @@ The application is published as a compressed single-file .NET executable. The
 yt-dlp, FFmpeg, FFprobe, and Deno executables remain separate because the app
 must launch them as external programs.
 
+The RaminDownloader logo is embedded in the application resources and is also
+used as the Windows executable icon; it is not required as a separate package
+file.
+
 The tools are release assets rather than normal Git history to keep the repository manageable. Never add browser profiles, cookies, passwords, or tokens to the repository or release.
 
 ## Limitations and legal use

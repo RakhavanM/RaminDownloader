@@ -10,10 +10,15 @@
     <RootNamespace>RaminDownloader</RootNamespace>
     <AssemblyName>RaminDownloader</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\RaminDownloader.ico</ApplicationIcon>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\ramindownloader-logo.jpg" />
+  </ItemGroup>
 </Project>
 

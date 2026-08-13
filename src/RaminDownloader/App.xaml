@@ -3,5 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+        <BitmapImage x:Key="AppLogo" UriSource="/RaminDownloader;component/Assets/ramindownloader-logo.jpg" />
     </Application.Resources>
 </Application>

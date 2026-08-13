@@ -1,0 +1,5 @@
+**/bin/
+**/obj/
+artifacts/
+dist/
+tools/win-x64/*.exe

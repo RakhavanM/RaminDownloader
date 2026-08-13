@@ -1,0 +1,54 @@
+name: Build Windows release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.x
+
+      - name: Test
+        run: dotnet test tests/RaminDownloader.Tests/RaminDownloader.Tests.csproj --configuration Release --framework net8.0
+
+      - name: Package
+        shell: pwsh
+        run: ./packaging/package.ps1
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RaminDownloader-win-x64
+          path: dist/RaminDownloader-win-x64.zip
+
+      - name: Publish release asset
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/RaminDownloader-win-x64.zip
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release checksum file
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          Get-FileHash dist/RaminDownloader-win-x64.zip -Algorithm SHA256 | ForEach-Object { "$($_.Hash.ToLowerInvariant())  RaminDownloader-win-x64.zip" } | Set-Content dist/SHA256SUMS.txt
+          gh release upload "${{ github.ref_name }}" dist/SHA256SUMS.txt --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

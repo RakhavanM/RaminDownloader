@@ -14,6 +14,13 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        SourceInitialized += (_, _) =>
+        {
+            if (Application.Current?.MainWindow is null)
+            {
+                Application.Current!.MainWindow = this;
+            }
+        };
     }
 
     private void PasteButton_Click(object sender, RoutedEventArgs e)

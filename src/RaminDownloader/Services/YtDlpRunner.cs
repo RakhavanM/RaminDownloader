@@ -17,7 +17,7 @@ public sealed class YtDlpRunner
         Directory.CreateDirectory(downloadDirectory);
 
         var tools = ToolLocator.Locate(applicationDirectory);
-        var arguments = YtDlpArgumentsBuilder.Build(options, downloadDirectory, tools.Directory);
+        var arguments = YtDlpArgumentsBuilder.Build(options, downloadDirectory, tools.Directory, tools.Deno);
         var startInfo = new ProcessStartInfo
         {
             FileName = tools.YtDlp,

@@ -36,7 +36,7 @@ public sealed class UiPackagingContractTests
         Assert.Contains("PublishSingleFile", project);
         Assert.Contains("IncludeNativeLibrariesForSelfExtract", project);
         Assert.Contains("EnableCompressionInSingleFile", project);
-        Assert.Contains("tools\\win-x64", package);
+        Assert.Contains("Assets", package);
         Assert.Contains("RaminDownloader.exe", package);
     }
 

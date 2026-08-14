@@ -13,41 +13,66 @@ public static class ToolLocator
 {
     public static BundledTools Locate(string applicationDirectory)
     {
+        if (TryLocate(applicationDirectory, out var tools))
+        {
+            return tools;
+        }
+
+        throw new FileNotFoundException("Required tools are not installed. Click Update to download yt-dlp, FFmpeg, FFprobe, and Deno.");
+    }
+
+    public static bool TryLocate(string applicationDirectory, out BundledTools tools)
+    {
         ArgumentException.ThrowIfNullOrWhiteSpace(applicationDirectory);
 
+        var ytDlp = FindExecutable(applicationDirectory, "yt-dlp.exe");
+        var ffmpeg = FindExecutable(applicationDirectory, "ffmpeg.exe");
+        var ffprobe = FindExecutable(applicationDirectory, "ffprobe.exe");
+        var deno = FindExecutable(applicationDirectory, "deno.exe");
+
+        if (ytDlp is not null && ffmpeg is not null && ffprobe is not null && deno is not null)
+        {
+            tools = new BundledTools(
+                Path.GetDirectoryName(ffmpeg) ?? applicationDirectory,
+                ytDlp,
+                ffmpeg,
+                ffprobe,
+                deno);
+            return true;
+        }
+
+        tools = null!;
+        return false;
+    }
+
+    public static string? FindExecutable(string applicationDirectory, string name)
+    {
         var candidates = new[]
         {
-            Path.Combine(applicationDirectory, "tools", "win-x64"),
-            Path.Combine(applicationDirectory, "tools"),
-            applicationDirectory
+            Path.Combine(applicationDirectory, "Assets", "tools", name),
+            Path.Combine(applicationDirectory, "tools", "win-x64", name),
+            Path.Combine(applicationDirectory, "tools", name),
+            Path.Combine(applicationDirectory, name)
         };
 
-        foreach (var directory in candidates)
+        foreach (var candidate in candidates)
         {
-            var paths = new
+            if (File.Exists(candidate))
             {
-                Directory = directory,
-                YtDlp = Path.Combine(directory, "yt-dlp.exe"),
-                Ffmpeg = Path.Combine(directory, "ffmpeg.exe"),
-                Ffprobe = Path.Combine(directory, "ffprobe.exe"),
-                Deno = Path.Combine(directory, "deno.exe")
-            };
-
-            if (File.Exists(paths.YtDlp) &&
-                File.Exists(paths.Ffmpeg) &&
-                File.Exists(paths.Ffprobe) &&
-                File.Exists(paths.Deno))
-            {
-                return new BundledTools(
-                    paths.Directory,
-                    paths.YtDlp,
-                    paths.Ffmpeg,
-                    paths.Ffprobe,
-                    paths.Deno);
+                return Path.GetFullPath(candidate);
             }
         }
 
-        throw new FileNotFoundException(
-            "The bundled yt-dlp, FFmpeg, FFprobe, and Deno files were not found. Re-extract the complete application package.");
+        var path = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+        foreach (var directory in path.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var candidate = Path.Combine(directory.Trim('"'), name);
+            if (File.Exists(candidate))
+            {
+                return Path.GetFullPath(candidate);
+            }
+        }
+
+        return null;
     }
 }

@@ -8,7 +8,8 @@ public static class YtDlpArgumentsBuilder
     public static IReadOnlyList<string> Build(
         DownloadOptions options,
         string downloadDirectory,
-        string toolsDirectory)
+        string toolsDirectory,
+        string? denoPath = null)
     {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentException.ThrowIfNullOrWhiteSpace(downloadDirectory);
@@ -25,7 +26,7 @@ public static class YtDlpArgumentsBuilder
             "--sleep-requests", "1",
             "--output", Path.Combine(downloadDirectory, "%(title)s [%(id)s].%(ext)s"),
             "--ffmpeg-location", toolsDirectory,
-            "--js-runtimes", $"deno:{Path.Combine(toolsDirectory, "deno.exe")}",
+            "--js-runtimes", $"deno:{denoPath ?? Path.Combine(toolsDirectory, "deno.exe")}",
             "--merge-output-format", "mp4"
         };
 

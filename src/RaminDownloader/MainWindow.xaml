@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="RaminDownloader" Height="620" Width="760"
         MinHeight="560" MinWidth="680"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen" Loaded="Window_Loaded">
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -64,6 +64,7 @@
         </StackPanel>
 
         <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button x:Name="UpdateButton" Content="UPDATE" Width="100" Height="34" Margin="0,0,10,0" Click="UpdateButton_Click" />
             <Button x:Name="CancelButton" Content="Cancel" Width="100" Height="34" Margin="0,0,10,0" Click="CancelButton_Click" IsEnabled="False" />
             <Button x:Name="DownloadButton" Content="Download" Width="120" Height="34" Click="DownloadButton_Click" IsDefault="True" />
         </StackPanel>

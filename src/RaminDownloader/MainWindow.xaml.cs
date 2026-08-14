@@ -10,11 +10,16 @@ namespace RaminDownloader;
 public partial class MainWindow : Window
 {
     private readonly YtDlpRunner _runner = new();
+    private readonly ToolManager _toolManager;
+    private readonly AppUpdateManager _appUpdateManager;
     private CancellationTokenSource? _downloadCancellation;
+    private CancellationTokenSource? _toolUpdateCancellation;
 
     public MainWindow()
     {
         InitializeComponent();
+        _toolManager = new ToolManager(AppContext.BaseDirectory);
+        _appUpdateManager = new AppUpdateManager(AppContext.BaseDirectory);
         ApplyBranding();
         SourceInitialized += (_, _) =>
         {
@@ -23,6 +28,68 @@ public partial class MainWindow : Window
                 Application.Current!.MainWindow = this;
             }
         };
+    }
+
+    private async void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+        await EnsureToolsAsync();
+    }
+
+    private async void UpdateButton_Click(object sender, RoutedEventArgs e)
+    {
+        await UpdateAsync();
+        await CheckForAppUpdateAsync();
+    }
+
+    private async Task EnsureToolsAsync()
+    {
+        if (ToolLocator.TryLocate(AppContext.BaseDirectory, out _)) return;
+        await UpdateAsync();
+    }
+
+    private async Task UpdateAsync()
+    {
+        SetBusy(true);
+        LatestOutputTextBlock.Text = "Checking and installing required tools...";
+        _toolUpdateCancellation = new CancellationTokenSource();
+        try
+        {
+            var progress = new Progress<string>(message => LatestOutputTextBlock.Text = message);
+            await _toolManager.UpdateAsync(progress, _toolUpdateCancellation.Token);
+            StatusTextBlock.Text = "Tools are up to date.";
+            LatestOutputTextBlock.Text = "yt-dlp, FFmpeg, FFprobe, and Deno are ready.";
+        }
+        catch (Exception exception)
+        {
+            StatusTextBlock.Text = "Tool update failed.";
+            LatestOutputTextBlock.Text = exception.Message;
+            MessageBox.Show(this, exception.ToString(), "Tool update failed", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            _toolUpdateCancellation?.Dispose();
+            _toolUpdateCancellation = null;
+            SetBusy(false);
+        }
+    }
+
+    private async Task CheckForAppUpdateAsync()
+    {
+        try
+        {
+            var update = await _appUpdateManager.CheckAsync();
+            if (update is null) return;
+            var answer = MessageBox.Show(this, $"RaminDownloader {update.LatestVersion} is available. Update now?", "Application update", MessageBoxButton.YesNo, MessageBoxImage.Information);
+            if (answer == MessageBoxResult.Yes)
+            {
+                await _appUpdateManager.DownloadAndScheduleAsync(update, "RaminDownloader.exe", new Progress<string>(message => LatestOutputTextBlock.Text = message));
+                Application.Current.Shutdown();
+            }
+        }
+        catch (Exception exception)
+        {
+            MessageBox.Show(this, exception.Message, "Application update check failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
     }
 
     private void ApplyBranding()
@@ -146,6 +213,7 @@ public partial class MainWindow : Window
     private void SetBusy(bool busy)
     {
         DownloadButton.IsEnabled = !busy;
+        UpdateButton.IsEnabled = !busy;
         CancelButton.IsEnabled = busy;
         PasteButton.IsEnabled = !busy;
         UrlTextBox.IsEnabled = !busy;

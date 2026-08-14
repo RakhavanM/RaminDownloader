@@ -12,10 +12,77 @@ public partial class MainWindow : Window
 {
     private Process? _terminalProcess;
     private string? _scriptPath;
+    private readonly ToolManager _toolManager;
+    private readonly AppUpdateManager _appUpdateManager;
+    private CancellationTokenSource? _toolUpdateCancellation;
 
     public MainWindow()
     {
         InitializeComponent();
+        _toolManager = new ToolManager(AppContext.BaseDirectory);
+        _appUpdateManager = new AppUpdateManager(AppContext.BaseDirectory);
+    }
+
+    private async void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+        await EnsureToolsAsync();
+    }
+
+    private async void UpdateButton_Click(object sender, RoutedEventArgs e)
+    {
+        await UpdateAsync();
+        await CheckForAppUpdateAsync();
+    }
+
+    private async Task EnsureToolsAsync()
+    {
+        if (ToolLocator.TryLocate(AppContext.BaseDirectory, out _)) return;
+        await UpdateAsync();
+    }
+
+    private async Task UpdateAsync()
+    {
+        UpdateButton.IsEnabled = false;
+        RunButton.IsEnabled = false;
+        CommandPreviewTextBox.Text = "Checking and installing required tools...";
+        _toolUpdateCancellation = new CancellationTokenSource();
+        try
+        {
+            var progress = new Progress<string>(message => CommandPreviewTextBox.Text = message);
+            await _toolManager.UpdateAsync(progress, _toolUpdateCancellation.Token);
+            CommandPreviewTextBox.Text = "yt-dlp, FFmpeg, FFprobe, and Deno are ready.";
+        }
+        catch (Exception exception)
+        {
+            CommandPreviewTextBox.Text = exception.Message;
+            MessageBox.Show(this, exception.ToString(), "Tool update failed", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            _toolUpdateCancellation?.Dispose();
+            _toolUpdateCancellation = null;
+            UpdateButton.IsEnabled = true;
+            RunButton.IsEnabled = true;
+        }
+    }
+
+    private async Task CheckForAppUpdateAsync()
+    {
+        try
+        {
+            var update = await _appUpdateManager.CheckAsync();
+            if (update is null) return;
+            var answer = MessageBox.Show(this, $"RaminYtDlpControl {update.LatestVersion} is available. Update both applications now?", "Application update", MessageBoxButton.YesNo, MessageBoxImage.Information);
+            if (answer == MessageBoxResult.Yes)
+            {
+                await _appUpdateManager.DownloadAndScheduleAsync(update, "RaminYtDlpControl.exe", new Progress<string>(message => CommandPreviewTextBox.Text = message));
+                Application.Current.Shutdown();
+            }
+        }
+        catch (Exception exception)
+        {
+            MessageBox.Show(this, exception.Message, "Application update check failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
     }
 
     private void RunButton_Click(object sender, RoutedEventArgs e)
@@ -34,7 +101,7 @@ public partial class MainWindow : Window
             }
 
             var toolPaths = ToolLocator.Locate(AppContext.BaseDirectory);
-            var arguments = BuildArguments(toolPaths.Directory, urls);
+            var arguments = BuildArguments(toolPaths.Directory, toolPaths.Deno, urls);
             CommandPreviewTextBox.Text = RenderPreview(toolPaths.YtDlp, arguments);
             LaunchVisibleTerminal(toolPaths.YtDlp, arguments);
         }
@@ -59,14 +126,14 @@ public partial class MainWindow : Window
         }
     }
 
-    private List<string> BuildArguments(string toolsDirectory, IReadOnlyList<string> urls)
+    private List<string> BuildArguments(string toolsDirectory, string denoPath, IReadOnlyList<string> urls)
     {
         var arguments = new List<string>
         {
             "--newline",
             "--windows-filenames",
             "--ffmpeg-location", toolsDirectory,
-            "--js-runtimes", $"deno:{Path.Combine(toolsDirectory, "deno.exe")}",
+            "--js-runtimes", $"deno:{denoPath}",
             "--output", Path.Combine(OutputFolderTextBox.Text.Trim(), OutputTemplateTextBox.Text.Trim()),
             "--merge-output-format", Mp4RadioButton.IsChecked == true ? "mp4" : "mkv"
         };

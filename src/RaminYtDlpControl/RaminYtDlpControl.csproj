@@ -9,6 +9,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>RaminYtDlpControl</RootNamespace>
     <AssemblyName>RaminYtDlpControl</AssemblyName>
+    <Version>0.6.0</Version>
+    <AssemblyVersion>0.6.0.0</AssemblyVersion>
+    <FileVersion>0.6.0.0</FileVersion>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
@@ -18,5 +21,8 @@
 
   <ItemGroup>
     <Compile Include="../RaminDownloader/Services/ToolLocator.cs" Link="Services/ToolLocator.cs" />
+    <Compile Include="../RaminDownloader/Services/ToolManager.cs" Link="Services/ToolManager.cs" />
+    <Compile Include="../RaminDownloader/Services/AppUpdateManager.cs" Link="Services/AppUpdateManager.cs" />
+    <None Include="../RaminDownloader/Assets/tools-manifest.json" Link="Assets/tools-manifest.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

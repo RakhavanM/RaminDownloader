@@ -12,7 +12,9 @@ A private Windows x64 WPF desktop GUI for downloading permitted web video or MP3
 - Clipboard Paste button for the URL
 - Cancellation support
 - MP4 video output
-- Bundled Windows x64 tools in release packages (pinned and hash-verified)
+- Downloads Windows x64 tools on first run and verifies their hashes
+- Downloads missing yt-dlp, FFmpeg, FFprobe, and Deno on first launch
+- UPDATE button for dependency and application updates
 - Firefox cookies read locally through yt-dlp
 
 ## Firefox cookie note
@@ -33,14 +35,11 @@ dotnet test
 
 ## Release packaging
 
-The release workflow fetches pinned, hash-verified Windows x64 binaries and publishes a ZIP containing:
+The release workflow publishes a ZIP containing:
 
 - One self-contained `RaminDownloader.exe`
 - One self-contained `RaminYtDlpControl.exe` companion control-center GUI
-- `tools/win-x64/yt-dlp.exe`
-- `tools/win-x64/ffmpeg.exe`
-- `tools/win-x64/ffprobe.exe`
-- `tools/win-x64/deno.exe`
+- `Assets/tools-manifest.json` for first-run dependency downloads
 - `Assets/RaminDownloader.ico`
 - `Assets/ramindownloader-logo.jpg`
 - third-party notices and checksums
@@ -53,7 +52,10 @@ The RaminDownloader logo is embedded in the application resources and is also
 used as the Windows executable icon; it is not required as a separate package
 file.
 
-The tools are release assets rather than normal Git history to keep the repository manageable. Never add browser profiles, cookies, passwords, or tokens to the repository or release.
+The tools are downloaded on first launch into `Assets/tools` and verified with
+SHA-256 checksums. The UPDATE button checks the public GitHub release and the
+latest upstream dependency downloads. Never add browser profiles, cookies,
+passwords, or tokens to the repository or release.
 
 ## Limitations and legal use
 

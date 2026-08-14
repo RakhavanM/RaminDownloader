@@ -28,6 +28,7 @@ public sealed class BrandingContractTests
         var code = File.ReadAllText(Path.Combine(RepositoryRoot, "src", "RaminDownloader", "MainWindow.xaml.cs"));
 
         Assert.Contains("LogoImage", xaml);
+        Assert.DoesNotContain("AppLogo", xaml);
         Assert.DoesNotContain("Icon=", xaml);
         Assert.Contains("LogoImage.Source", code);
         Assert.Contains("Icon =", code);

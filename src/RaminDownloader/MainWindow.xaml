@@ -19,7 +19,7 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,0,0,18">
-            <Image x:Name="LogoImage" Source="{StaticResource AppLogo}" Width="92" Height="92" Stretch="Uniform" Margin="0,0,18,0" />
+            <Image x:Name="LogoImage" Width="92" Height="92" Stretch="Uniform" Margin="0,0,18,0" />
             <StackPanel VerticalAlignment="Center">
                 <TextBlock Text="RAMIN" FontSize="26" FontWeight="Bold" Foreground="#D70000" />
                 <TextBlock Text="DOWNLOADER" FontSize="14" FontWeight="SemiBold" Foreground="#D70000" />

@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
-using System.Windows.Media.Imaging;
+
 using RaminDownloader.Models;
 using RaminDownloader.Services;
 
@@ -20,7 +20,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         _toolManager = new ToolManager(AppContext.BaseDirectory);
         _appUpdateManager = new AppUpdateManager(AppContext.BaseDirectory);
-        ApplyBranding();
+
         SourceInitialized += (_, _) =>
         {
             if (Application.Current?.MainWindow is null)
@@ -92,20 +92,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private void ApplyBranding()
-    {
-        var logoPath = Path.Combine(AppContext.BaseDirectory, "Assets", "ramindownloader-logo.jpg");
-        if (File.Exists(logoPath))
-        {
-            LogoImage.Source = new BitmapImage(new Uri(logoPath, UriKind.Absolute));
-        }
-
-        var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "RaminDownloader.ico");
-        if (File.Exists(iconPath))
-        {
-            Icon = new BitmapImage(new Uri(iconPath, UriKind.Absolute));
-        }
-    }
 
     private void PasteButton_Click(object sender, RoutedEventArgs e)
     {

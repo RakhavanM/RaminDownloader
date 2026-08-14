@@ -40,17 +40,11 @@ The release workflow publishes a ZIP containing:
 - One self-contained `RaminDownloader.exe`
 - One self-contained `RaminYtDlpControl.exe` companion control-center GUI
 - `Assets/tools-manifest.json` for first-run dependency downloads
-- `Assets/RaminDownloader.ico`
-- `Assets/ramindownloader-logo.jpg`
 - third-party notices and checksums
 
 Both applications are published as compressed single-file .NET executables. The
 yt-dlp, FFmpeg, FFprobe, and Deno executables remain separate because the app
 must launch them as external programs.
-
-The RaminDownloader logo is embedded in the application resources and is also
-used as the Windows executable icon; it is not required as a separate package
-file.
 
 The tools are downloaded on first launch into `Assets/tools` and verified with
 SHA-256 checksums. The UPDATE button checks the public GitHub release and the

@@ -27,8 +27,6 @@ Copy-Item (Join-Path $publish 'RaminDownloader.exe') $packageRoot -Force
 Copy-Item (Join-Path $controlPublish 'RaminYtDlpControl.exe') $packageRoot -Force
 if (-not (Test-Path (Join-Path $packageRoot 'RaminDownloader.exe'))) { throw 'RaminDownloader.exe was not produced.' }
 if (-not (Test-Path (Join-Path $packageRoot 'RaminYtDlpControl.exe'))) { throw 'RaminYtDlpControl.exe was not produced.' }
-Copy-Item (Join-Path $root 'src\RaminDownloader\Assets\RaminDownloader.ico') $packageAssets -Force
-Copy-Item (Join-Path $root 'src\RaminDownloader\Assets\ramindownloader-logo.jpg') $packageAssets -Force
 Copy-Item (Join-Path $root 'src\RaminDownloader\Assets\tools-manifest.json') $packageAssets -Force
 Copy-Item (Join-Path $root 'README.md') $packageRoot -Force
 Copy-Item (Join-Path $root 'LICENSE') $packageRoot -Force

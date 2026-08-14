@@ -5,33 +5,32 @@ public sealed class BrandingContractTests
     private static readonly string RepositoryRoot = FindRepositoryRoot();
 
     [Fact]
-    public void ProjectDeclaresAppIconAndLogoResource()
+    public void BrandingImagesAreNotUsedOrPackaged()
     {
         var project = File.ReadAllText(Path.Combine(RepositoryRoot, "src", "RaminDownloader", "RaminDownloader.csproj"));
-        var app = File.ReadAllText(Path.Combine(RepositoryRoot, "src", "RaminDownloader", "App.xaml"));
-
-        Assert.Contains("ApplicationIcon", project);
-        Assert.Contains("RaminDownloader.ico", project);
-        Assert.Contains("ramindownloader-logo.jpg", project);
-        Assert.DoesNotContain("ramindownloader-logo.jpg", app);
-        Assert.True(File.Exists(Path.Combine(RepositoryRoot, "src", "RaminDownloader", "Assets", "RaminDownloader.ico")));
-        Assert.True(File.Exists(Path.Combine(RepositoryRoot, "src", "RaminDownloader", "Assets", "ramindownloader-logo.jpg")));
+        var xaml = File.ReadAllText(Path.Combine(RepositoryRoot, "src", "RaminDownloader", "MainWindow.xaml"));
+        var code = File.ReadAllText(Path.Combine(RepositoryRoot, "src", "RaminDownloader", "MainWindow.xaml.cs"));
         var packaging = File.ReadAllText(Path.Combine(RepositoryRoot, "packaging", "package.ps1"));
-        Assert.Contains("$packageAssets", packaging);
-        Assert.Contains("RaminDownloader.ico", packaging);
+
+        Assert.DoesNotContain("ApplicationIcon", project);
+        Assert.DoesNotContain("RaminDownloader.ico", project);
+        Assert.DoesNotContain("ramindownloader-logo.jpg", project);
+        Assert.DoesNotContain("LogoImage", xaml);
+        Assert.DoesNotContain("ApplyBranding", code);
+        Assert.DoesNotContain("BitmapImage", code);
+        Assert.DoesNotContain("RaminDownloader.ico", packaging);
+        Assert.DoesNotContain("ramindownloader-logo.jpg", packaging);
     }
 
     [Fact]
-    public void MainWindowUsesRuntimeBrandingWithoutFragileIconUri()
+    public void MainWindowUsesTextOnlyBranding()
     {
         var xaml = File.ReadAllText(Path.Combine(RepositoryRoot, "src", "RaminDownloader", "MainWindow.xaml"));
-        var code = File.ReadAllText(Path.Combine(RepositoryRoot, "src", "RaminDownloader", "MainWindow.xaml.cs"));
 
-        Assert.Contains("LogoImage", xaml);
-        Assert.DoesNotContain("AppLogo", xaml);
+        Assert.Contains("RAMIN", xaml);
+        Assert.Contains("DOWNLOADER", xaml);
+        Assert.DoesNotContain("<Image", xaml);
         Assert.DoesNotContain("Icon=", xaml);
-        Assert.Contains("LogoImage.Source", code);
-        Assert.Contains("Icon =", code);
     }
 
     private static string FindRepositoryRoot()

@@ -41,6 +41,8 @@ The release workflow fetches pinned, hash-verified Windows x64 binaries and publ
 - `tools/win-x64/ffmpeg.exe`
 - `tools/win-x64/ffprobe.exe`
 - `tools/win-x64/deno.exe`
+- `Assets/RaminDownloader.ico`
+- `Assets/ramindownloader-logo.jpg`
 - third-party notices and checksums
 
 Both applications are published as compressed single-file .NET executables. The

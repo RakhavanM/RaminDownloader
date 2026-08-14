@@ -12,20 +12,25 @@ public sealed class BrandingContractTests
 
         Assert.Contains("ApplicationIcon", project);
         Assert.Contains("RaminDownloader.ico", project);
-        Assert.Contains("ramindownloader-logo.jpg", app);
+        Assert.Contains("ramindownloader-logo.jpg", project);
+        Assert.DoesNotContain("ramindownloader-logo.jpg", app);
         Assert.True(File.Exists(Path.Combine(RepositoryRoot, "src", "RaminDownloader", "Assets", "RaminDownloader.ico")));
         Assert.True(File.Exists(Path.Combine(RepositoryRoot, "src", "RaminDownloader", "Assets", "ramindownloader-logo.jpg")));
         var packaging = File.ReadAllText(Path.Combine(RepositoryRoot, "packaging", "package.ps1"));
-        Assert.DoesNotContain("Copy-Item (Join-Path $root 'src\\RaminDownloader\\Assets\\ramindownloader-logo.jpg')", packaging);
+        Assert.Contains("$packageAssets", packaging);
+        Assert.Contains("RaminDownloader.ico", packaging);
     }
 
     [Fact]
-    public void MainWindowDisplaysLogo()
+    public void MainWindowUsesRuntimeBrandingWithoutFragileIconUri()
     {
         var xaml = File.ReadAllText(Path.Combine(RepositoryRoot, "src", "RaminDownloader", "MainWindow.xaml"));
+        var code = File.ReadAllText(Path.Combine(RepositoryRoot, "src", "RaminDownloader", "MainWindow.xaml.cs"));
 
         Assert.Contains("LogoImage", xaml);
-        Assert.Contains("{StaticResource AppLogo}", xaml);
+        Assert.DoesNotContain("Icon=", xaml);
+        Assert.Contains("LogoImage.Source", code);
+        Assert.Contains("Icon =", code);
     }
 
     private static string FindRepositoryRoot()

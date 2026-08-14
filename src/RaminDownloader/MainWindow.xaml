@@ -1,7 +1,7 @@
 <Window x:Class="RaminDownloader.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="RaminDownloader" Icon="/RaminDownloader;component/Assets/RaminDownloader.ico" Height="620" Width="760"
+        Title="RaminDownloader" Height="620" Width="760"
         MinHeight="560" MinWidth="680"
         WindowStartupLocation="CenterScreen">
     <Grid Margin="24">

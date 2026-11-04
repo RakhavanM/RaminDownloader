@@ -16,47 +16,65 @@ internal static class MediaJobs
     public static async Task DownloadAsync(DownloadOptions options, string? firefoxProfile,
         string folder, IProgress<double> progress, CancellationToken cancellation)
     {
-        Directory.CreateDirectory(folder);
+        try { Directory.CreateDirectory(folder); }
+        catch (Exception exception) when (JobErrors.IsFileError(exception))
+        {
+            throw JobErrors.Storage(exception);
+        }
         var deno = Path.Combine(ToolProcess.Directory, OperatingSystem.IsWindows() ? "deno.exe" : "deno");
         var args = new List<string> { "--ignore-config", "--progress", "--no-colors" };
         args.AddRange(YtDlpArgumentsBuilder.Build(options, folder, ToolProcess.Directory, deno, firefoxProfile));
         args.Insert(args.Count - 1, "--");
 
-        string? error = null;
+        var error = new ToolDiagnostics();
         var exit = await ToolProcess.RunAsync("yt-dlp", args, line =>
         {
             if (line.StartsWith("[download]") && ProgressParser.Parse(line)?.Percent is { } percent)
                 progress.Report(Math.Min(percent, 99));
-        }, line =>
-        {
-            if (line.StartsWith("ERROR:", StringComparison.Ordinal))
-                error = line;
-        }, cancellation);
+        }, error.Append, cancellation);
 
         if (exit != 0)
-        {
-            if (options.UseFirefoxCookies && error?.Contains("cookie", StringComparison.OrdinalIgnoreCase) == true)
-                throw new IOException("Firefox cookies could not be read. Check the profile, sign in there, and close Firefox if the profile is locked.");
-
-            throw new IOException(error ?? $"The download failed (yt-dlp exit code {exit}).");
-        }
+            throw JobErrors.Download(exit, error.ToString(), options.UseFirefoxCookies);
     }
 
     public static async Task ProcessAsync(string input, string output, MediaOptions options,
         IProgress<double> progress, CancellationToken cancellation)
     {
-        if (!File.Exists(input))
-            throw new IOException("Choose an existing media file.");
+        try
+        {
+            using var inputFile = File.Open(input, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        }
+        catch (Exception exception) when (JobErrors.IsFileError(exception))
+        {
+            throw new JobError(Failure.Input,
+                "The input file could not be opened. Check that it still exists and that you can read it, then choose it again.", exception.Message, exception);
+        }
         if (File.Exists(output))
-            throw new IOException("A file already exists at the output path. Choose a new filename.");
+            throw OutputExists(output);
+
+        var destinationFolder = Path.GetDirectoryName(output)!;
+        try
+        {
+            if (!File.GetAttributes(destinationFolder).HasFlag(FileAttributes.Directory))
+                throw new DirectoryNotFoundException(destinationFolder);
+        }
+        catch (FileNotFoundException exception)
+        {
+            throw JobErrors.Storage(new DirectoryNotFoundException(destinationFolder, exception));
+        }
+        catch (Exception exception) when (JobErrors.IsFileError(exception))
+        {
+            throw JobErrors.Storage(exception);
+        }
 
         var info = await ProbeAsync(input, cancellation);
         var audioOnly = options.Format is "MP3" or "M4A" or "Opus" or "WAV" or "FLAC";
         if (audioOnly ? !info.Audio : !info.Video)
-            throw new IOException(audioOnly ? "The input has no audio track." : "The input has no video track.");
+            throw new JobError(Failure.Input, audioOnly ? "The input has no audio track. Choose a file with sound." :
+                "The input has no video track. Choose a video file or convert it to an audio format.");
 
         // Keep unfinished outputs beside their destination so the final move is atomic.
-        var temporary = Path.Combine(Path.GetDirectoryName(output)!,
+        var temporary = Path.Combine(destinationFolder,
             $".ramin-{Guid.NewGuid():N}{Path.GetExtension(output)}");
         try
         {
@@ -83,23 +101,34 @@ internal static class MediaJobs
                 args.AddRange(["-movflags", "+faststart"]);
             args.Add(temporary);
 
-            string? error = null;
+            var error = new ToolDiagnostics();
             var exit = await ToolProcess.RunAsync("ffmpeg", args, line =>
             {
                 if (info.Duration > 0 && line.StartsWith("out_time_us=", StringComparison.Ordinal) &&
                     long.TryParse(line.AsSpan(12), CultureInfo.InvariantCulture, out var microseconds))
                     progress.Report(Math.Clamp(microseconds / (info.Duration * 10_000), 0, 99));
-            }, line => error = line, cancellation);
+            }, error.Append, cancellation);
             if (exit != 0 || !File.Exists(temporary))
-                throw new IOException(error ?? $"Media processing failed (FFmpeg exit code {exit}).");
+                throw JobErrors.Encode(exit, error.ToString());
             cancellation.ThrowIfCancellationRequested();
-            File.Move(temporary, output);
+            try { File.Move(temporary, output); }
+            catch (IOException) when (File.Exists(output)) { throw OutputExists(output); }
+            catch (Exception exception) when (JobErrors.IsFileError(exception))
+            {
+                throw JobErrors.Storage(exception);
+            }
         }
         finally
         {
-            File.Delete(temporary);
+            // Cleanup failure must not replace the original failure or cancellation.
+            try { File.Delete(temporary); }
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
         }
     }
+
+    private static JobError OutputExists(string path) => new(Failure.Storage,
+        "A file already exists at the output path. Choose a different filename.", path);
 
     private static string AudioEncoder(string format) => format switch
     {
@@ -114,11 +143,14 @@ internal static class MediaJobs
         string input, CancellationToken cancellation)
     {
         var json = new System.Text.StringBuilder();
+        var error = new ToolDiagnostics();
         var exit = await ToolProcess.RunAsync("ffprobe",
             ["-v", "error", "-show_entries", "format=duration:stream=codec_type:stream_disposition=attached_pic",
-                "-of", "json", "-i", input], line => json.AppendLine(line), null, cancellation);
+                "-of", "json", "-i", input], line => json.AppendLine(line), error.Append, cancellation);
         if (exit != 0)
-            throw new IOException("The selected file could not be read as audio or video.");
+            throw new JobError(Failure.Input,
+                "The selected file could not be read as audio or video. Check that it plays in a media player or choose another file.",
+                JobErrors.ToolDetails("FFprobe", exit, error.ToString()));
 
         using var document = JsonDocument.Parse(json.ToString());
         var root = document.RootElement;

@@ -50,9 +50,9 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          bash packaging/desktop/build-deb.sh artifacts/app dist/ramin-downloader_1.0.0_amd64.deb
+          bash packaging/desktop/build-deb.sh artifacts/app dist/ramin-downloader_1.1.0_amd64.deb
           dpkg-deb --info dist/*.deb
-          sudo apt-get install -y ./dist/ramin-downloader_1.0.0_amd64.deb
+          sudo apt-get install -y ./dist/ramin-downloader_1.1.0_amd64.deb
           bash packaging/desktop/smoke-tools.sh /opt/ramin-downloader/tools
           result=0
           xvfb-run --auto-servernum timeout 6s ramin-downloader || result=$?

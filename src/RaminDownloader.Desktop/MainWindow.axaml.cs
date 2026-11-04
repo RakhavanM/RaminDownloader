@@ -37,8 +37,23 @@ public partial class MainWindow : Window
 
     private async void PasteLink(object? sender, RoutedEventArgs e)
     {
-        if (Clipboard is { } clipboard)
-            Url.Text = await clipboard.TryGetTextAsync() ?? "";
+        try
+        {
+            var text = Clipboard is { } clipboard ? await clipboard.TryGetTextAsync() : null;
+            if (string.IsNullOrWhiteSpace(text))
+                ShowError(new(Failure.Clipboard, "There is no text link to paste. Copy a link or type it in the URL box."));
+            else
+            {
+                Url.Text = text;
+                Status.Text = "Link pasted.";
+                ClearErrorDetails();
+            }
+        }
+        catch (Exception exception)
+        {
+            ShowError(new(Failure.Clipboard, "The clipboard could not be read. Paste with your keyboard or type the link.",
+                exception.Message, exception));
+        }
         Url.Focus();
     }
 
@@ -50,24 +65,70 @@ public partial class MainWindow : Window
 
     private async Task<string?> PickFolderAsync(string title)
     {
-        var folders = await StorageProvider.OpenFolderPickerAsync(new() { Title = title });
-        return folders.FirstOrDefault()?.TryGetLocalPath();
+        try
+        {
+            if (!StorageProvider.CanPickFolder)
+                throw new NotSupportedException("This desktop session does not provide a folder picker.");
+            var folders = await StorageProvider.OpenFolderPickerAsync(new() { Title = title });
+            var path = SelectionPath(folders.FirstOrDefault());
+            if (path is not null)
+            {
+                Status.Text = "Folder selected.";
+                ClearErrorDetails();
+            }
+            return path;
+        }
+        catch (Exception exception)
+        {
+            ShowError(exception as JobError ?? JobErrors.Picker(exception));
+            return null;
+        }
     }
 
     private async void ChooseInput(object? sender, RoutedEventArgs e)
     {
-        var files = await StorageProvider.OpenFilePickerAsync(new() { Title = "Choose audio or video" });
-        SelectInput(files.FirstOrDefault());
+        try
+        {
+            if (!StorageProvider.CanOpen)
+                throw new NotSupportedException("This desktop session does not provide a file picker.");
+            var files = await StorageProvider.OpenFilePickerAsync(new() { Title = "Choose audio or video" });
+            SelectInput(files.FirstOrDefault());
+        }
+        catch (Exception exception)
+        {
+            ShowError(exception as JobError ?? JobErrors.Picker(exception));
+        }
     }
 
-    private void DropFile(object? sender, DragEventArgs e) =>
-        SelectInput(e.DataTransfer.TryGetFiles()?.OfType<IStorageFile>().FirstOrDefault());
+    private void DropFile(object? sender, DragEventArgs e)
+    {
+        try
+        {
+            var file = e.DataTransfer.TryGetFiles()?.OfType<IStorageFile>().FirstOrDefault();
+            if (file is null)
+                ShowError(new(Failure.Input, "Drop an audio or video file here, or use Choose file."));
+            else
+                SelectInput(file);
+        }
+        catch (Exception exception)
+        {
+            ShowError(exception as JobError ?? new(Failure.Input,
+                "The dropped file could not be opened. Copy it to a local folder and use Choose file.", exception.Message, exception));
+        }
+    }
 
     private void SelectInput(IStorageFile? file)
     {
-        if (_active is null && file?.TryGetLocalPath() is { } path)
+        if (_active is null && SelectionPath(file) is { } path)
+        {
             InputFile.Text = path;
+            Status.Text = "File selected.";
+            ClearErrorDetails();
+        }
     }
+
+    private static string? SelectionPath(IStorageItem? item) =>
+        item is null ? null : item.TryGetLocalPath() ?? throw JobErrors.LocalPath();
 
     private void UpdateMediaForm()
     {
@@ -87,7 +148,7 @@ public partial class MainWindow : Window
         if (!DownloadOptions.TryCreate(Url.Text, (DownloadType)DownloadTypeBox.SelectedIndex,
             (DownloadQuality)DownloadQualityBox.SelectedIndex, Cookies.IsChecked == true, out var options))
         {
-            Status.Text = "Enter a valid HTTP or HTTPS link.";
+            ShowError(new(Failure.Input, "Enter a valid HTTP or HTTPS link."));
             return;
         }
 
@@ -101,9 +162,9 @@ public partial class MainWindow : Window
     {
         if (_choosingOutput || _active is not null)
             return;
-        if (InputFile.Text is not { } input || !File.Exists(input))
+        if (InputFile.Text is not { Length: > 0 } input)
         {
-            Status.Text = "Choose an audio or video file first.";
+            ShowError(new(Failure.Input, "Choose an audio or video file first."));
             return;
         }
         var action = (MediaAction)Operation.SelectedIndex;
@@ -117,6 +178,8 @@ public partial class MainWindow : Window
         string? output;
         try
         {
+            if (!StorageProvider.CanSave)
+                throw new NotSupportedException("This desktop session does not provide a save dialog.");
             var file = await StorageProvider.SaveFilePickerAsync(new()
             {
                 Title = "Save output as",
@@ -124,7 +187,13 @@ public partial class MainWindow : Window
                 SuggestedFileName = $"{Path.GetFileNameWithoutExtension(input)}-{action.ToString().ToLowerInvariant()}.{extension}",
                 FileTypeChoices = [new FilePickerFileType(format) { Patterns = [$"*.{extension}"] }]
             });
-            output = file?.TryGetLocalPath();
+            output = SelectionPath(file);
+        }
+        catch (Exception exception)
+        {
+            ShowError(exception as JobError ?? new(Failure.Picker,
+                "The save dialog could not open. Try again and choose a local folder you can write to.", exception.Message, exception));
+            return;
         }
         finally
         {
@@ -154,7 +223,7 @@ public partial class MainWindow : Window
         Cancel.IsEnabled = true;
         Progress.Value = 0;
         Progress.IsIndeterminate = true;
-        ToolTip.SetTip(Status, null);
+        ClearErrorDetails();
         Status.Text = running;
         var progress = new Progress<double>(value =>
         {
@@ -172,7 +241,7 @@ public partial class MainWindow : Window
             _outputFolder = folder;
             OpenOutput.IsVisible = true;
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
         {
             Progress.Value = 0;
             Status.Text = "Cancelled.";
@@ -180,8 +249,8 @@ public partial class MainWindow : Window
         catch (Exception exception)
         {
             Progress.Value = 0;
-            Status.Text = exception.Message;
-            ToolTip.SetTip(Status, exception.Message);
+            ShowError(exception as JobError ?? new(Failure.Unexpected,
+                "The operation could not finish. Try again. If it keeps failing, open the technical details.", exception.Message, exception));
         }
         finally
         {
@@ -190,6 +259,21 @@ public partial class MainWindow : Window
             Workspace.IsEnabled = true;
             Cancel.IsEnabled = false;
         }
+    }
+
+    private void ShowError(JobError error)
+    {
+        Status.Text = error.Message;
+        ErrorDetails.IsExpanded = false;
+        ErrorDetails.IsVisible = !string.IsNullOrWhiteSpace(error.Details);
+        TechnicalDetails.Text = error.Details;
+    }
+
+    private void ClearErrorDetails()
+    {
+        ErrorDetails.IsVisible = false;
+        ErrorDetails.IsExpanded = false;
+        TechnicalDetails.Text = null;
     }
 
     private void CancelJob(object? sender, RoutedEventArgs e)
@@ -213,9 +297,10 @@ public partial class MainWindow : Window
                 Process.Start(start)?.Dispose();
             }
         }
-        catch (Exception)
+        catch (Exception exception)
         {
-            Status.Text = $"Output folder: {_outputFolder}";
+            ShowError(new(Failure.Storage, $"The folder could not open automatically. Open this path in your file manager: {_outputFolder}",
+                exception.Message, exception));
         }
     }
 }

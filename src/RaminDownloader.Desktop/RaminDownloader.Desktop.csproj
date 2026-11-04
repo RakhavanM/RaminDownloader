@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>RaminDownloader.Desktop</AssemblyName>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <ApplicationIcon>../RaminDownloader/Assets/RaminDownloader.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>

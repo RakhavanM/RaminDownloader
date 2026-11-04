@@ -4,7 +4,7 @@ here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo="$(cd "$here/../.." && pwd)"
 publish="${1:?Pass the published application directory}"
 destination="${2:?Pass the output .deb path}"
-version="${3:-1.0.0}"
+version="${3:-1.1.0}"
 stage="$(mktemp -d)"
 trap 'rm -rf "$stage"' EXIT
 app="$stage/opt/ramin-downloader"

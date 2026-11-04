@@ -126,13 +126,19 @@
       </TabItem>
     </TabControl>
     <Border Grid.Row="2" Classes="card" Padding="16,12">
-      <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="8">
-        <TextBlock x:Name="Status" Text="Ready" TextWrapping="Wrap" MaxLines="3" TextTrimming="CharacterEllipsis" AutomationProperties.LiveSetting="Polite"/>
+      <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="8">
+        <TextBlock x:Name="Status" Text="Ready" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
           <Button x:Name="OpenOutput" IsVisible="False" Content="Open folder" Click="OpenFolder"/>
           <Button x:Name="Cancel" IsEnabled="False" Content="Cancel" Click="CancelJob"/>
         </StackPanel>
         <ProgressBar x:Name="Progress" Grid.Row="1" Grid.ColumnSpan="2" Maximum="100" Height="5" Foreground="#76E6CD" AutomationProperties.Name="Job progress"/>
+        <Expander x:Name="ErrorDetails" Grid.Row="2" Grid.ColumnSpan="2" IsVisible="False"
+                  Header="Technical details" HorizontalAlignment="Stretch">
+          <TextBox x:Name="TechnicalDetails" IsReadOnly="True" MaxHeight="130" TextWrapping="Wrap"
+                   AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                   FontFamily="monospace" AutomationProperties.Name="Technical error details"/>
+        </Expander>
       </Grid>
     </Border>
   </Grid>

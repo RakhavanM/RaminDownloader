@@ -1,6 +1,6 @@
 #define AppName "Ramin Downloader"
 #ifndef AppVersion
-  #define AppVersion "1.0.0"
+  #define AppVersion "1.1.0"
 #endif
 #ifndef PublishDir
   #error PublishDir must point to the self-contained publish directory

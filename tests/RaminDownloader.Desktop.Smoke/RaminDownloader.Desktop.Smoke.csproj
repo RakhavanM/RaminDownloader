@@ -8,6 +8,7 @@
   <ItemGroup>
     <Compile Include="../../src/RaminDownloader.Desktop/ToolProcess.cs" Link="ToolProcess.cs" />
     <Compile Include="../../src/RaminDownloader.Desktop/MediaJobs.cs" Link="MediaJobs.cs" />
+    <Compile Include="../../src/RaminDownloader.Desktop/JobError.cs" Link="JobError.cs" />
     <Compile Include="../../src/RaminDownloader/Models/DownloadOptions.cs" Link="DownloadOptions.cs" />
     <Compile Include="../../src/RaminDownloader/Services/YtDlpArgumentsBuilder.cs" Link="YtDlpArgumentsBuilder.cs" />
     <Compile Include="../../src/RaminDownloader/Services/ProgressParser.cs" Link="ProgressParser.cs" />

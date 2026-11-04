@@ -12,7 +12,7 @@ internal static class ToolProcess
         cancellation.ThrowIfCancellationRequested();
         var executable = Path.Combine(Directory, tool + (OperatingSystem.IsWindows() ? ".exe" : ""));
         if (!File.Exists(executable))
-            throw new IOException($"The bundled {tool} is missing. Reinstall Ramin Downloader.");
+            throw JobErrors.Tool(tool, new FileNotFoundException("Bundled executable is missing.", executable));
 
         var start = new ProcessStartInfo(executable)
         {
@@ -24,7 +24,7 @@ internal static class ToolProcess
         foreach (var argument in arguments)
             start.ArgumentList.Add(argument);
 
-        using var process = Process.Start(start) ?? throw new IOException($"Could not start {tool}.");
+        using var process = Start(start, tool);
         using var registration = cancellation.Register(() =>
         {
             try { process.Kill(entireProcessTree: true); }
@@ -36,6 +36,18 @@ internal static class ToolProcess
             ReadAsync(process.StandardError, stderr), process.WaitForExitAsync()).ConfigureAwait(false);
         cancellation.ThrowIfCancellationRequested();
         return process.ExitCode;
+    }
+
+    private static Process Start(ProcessStartInfo start, string tool)
+    {
+        try
+        {
+            return Process.Start(start) ?? throw new IOException("Process startup returned no handle.");
+        }
+        catch (Exception exception) when (exception is System.ComponentModel.Win32Exception or IOException)
+        {
+            throw JobErrors.Tool(tool, exception);
+        }
     }
 
     private static async Task ReadAsync(StreamReader reader, Action<string>? receive)

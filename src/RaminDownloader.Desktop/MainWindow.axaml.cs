@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using RaminDownloader.Models;
@@ -22,7 +23,7 @@ public partial class MainWindow : Window
         FormatBox.SelectedIndex = 0;
         Operation.SelectionChanged += (_, _) => UpdateMediaForm();
         FileCard.AddHandler(DragDrop.DragOverEvent, (_, e) =>
-            e.DragEffects = e.Data.Contains(DataFormats.Files) ? DragDropEffects.Copy : DragDropEffects.None);
+            e.DragEffects = e.DataTransfer.Formats.Contains(DataFormat.File) ? DragDropEffects.Copy : DragDropEffects.None);
         FileCard.AddHandler(DragDrop.DropEvent, DropFile);
         UpdateMediaForm();
         Closing += (_, _) => _active?.Cancel();
@@ -37,7 +38,7 @@ public partial class MainWindow : Window
     private async void PasteLink(object? sender, RoutedEventArgs e)
     {
         if (Clipboard is { } clipboard)
-            Url.Text = await clipboard.GetTextAsync() ?? "";
+            Url.Text = await clipboard.TryGetTextAsync() ?? "";
         Url.Focus();
     }
 
@@ -60,7 +61,7 @@ public partial class MainWindow : Window
     }
 
     private void DropFile(object? sender, DragEventArgs e) =>
-        SelectInput(e.Data.GetFiles()?.OfType<IStorageFile>().FirstOrDefault());
+        SelectInput(e.DataTransfer.TryGetFiles()?.OfType<IStorageFile>().FirstOrDefault());
 
     private void SelectInput(IStorageFile? file)
     {

@@ -9,8 +9,8 @@
     <ApplicationIcon>../RaminDownloader/Assets/RaminDownloader.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia.Desktop" Version="11.3.12" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.12" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.22" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.22" />
     <Compile Include="../RaminDownloader/Models/DownloadOptions.cs" Link="Download/DownloadOptions.cs" />
     <Compile Include="../RaminDownloader/Services/YtDlpArgumentsBuilder.cs" Link="Download/YtDlpArgumentsBuilder.cs" />
     <Compile Include="../RaminDownloader/Services/ProgressParser.cs" Link="Download/ProgressParser.cs" />

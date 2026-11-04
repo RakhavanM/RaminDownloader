@@ -35,12 +35,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: '10.0.403'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Publish application with runtime
-        run: dotnet publish src/RaminDownloader.Desktop -c Release -r ${{ matrix.rid }} --self-contained true -o artifacts/app
+        run: dotnet publish src/RaminDownloader.Desktop -c Release -r ${{ matrix.rid }} --self-contained true -o artifacts/app -p:NuGetAuditMode=all -warnaserror
       - name: Stage verified media tools
         run: python packaging/desktop/bundle_tools.py ${{ matrix.rid }} artifacts/app/tools
       - name: Exercise media jobs with bundled tools
@@ -54,6 +54,9 @@ jobs:
           dpkg-deb --info dist/*.deb
           sudo apt-get install -y ./dist/ramin-downloader_1.0.0_amd64.deb
           bash packaging/desktop/smoke-tools.sh /opt/ramin-downloader/tools
+          result=0
+          xvfb-run --auto-servernum timeout 6s ramin-downloader || result=$?
+          test "$result" = 124
       - name: Build and check Windows installer
         if: runner.os == 'Windows'
         shell: pwsh
@@ -66,10 +69,14 @@ jobs:
           $installDir = "$env:RUNNER_TEMP\ramin-install"
           $install = Start-Process (Resolve-Path "dist\RaminDownloader-Setup-win-x64.exe") -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/DIR=`"$installDir`"" -Wait -PassThru
           if ($install.ExitCode) { exit $install.ExitCode }
-          if (!(Test-Path "$installDir\RaminDownloader.Desktop.exe")) { throw "Desktop executable missing after installation." }
+          $app = "$installDir\RaminDownloader.Desktop.exe"
+          if (!(Test-Path $app)) { throw "Desktop executable missing after installation." }
           foreach ($tool in @("yt-dlp", "ffmpeg", "ffprobe", "deno")) {
             if (!(Test-Path "$installDir\tools\$tool.exe")) { throw "Bundled tool missing: $tool" }
           }
+          $window = Start-Process $app -PassThru
+          if ($window.WaitForExit(6000)) { throw "Installed app exited during launch: $($window.ExitCode)" }
+          Stop-Process -Id $window.Id
       - name: Generate installer checksum
         shell: bash
         run: cd dist && find . -maxdepth 1 -type f \( -name "*.exe" -o -name "*.deb" \) -exec sha256sum {} + > SHA256SUMS.txt && test -s SHA256SUMS.txt

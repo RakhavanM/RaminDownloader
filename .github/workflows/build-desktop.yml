@@ -2,9 +2,10 @@ name: Build desktop installers
 
 on:
   push:
-    branches: [avalonia-desktop]
+    branches: [main, avalonia-desktop]
   pull_request:
     paths:
+      - 'RaminDownloader.sln'
       - 'src/RaminDownloader.Desktop/**'
       - 'src/RaminDownloader/Models/**'
       - 'src/RaminDownloader/Services/**'

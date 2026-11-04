@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Ramin Downloader
+Comment=Download, resize, compress, and convert media
+Exec=ramin-downloader
+Icon=ramin-downloader
+Terminal=false
+Type=Application
+Categories=AudioVideo;Network;

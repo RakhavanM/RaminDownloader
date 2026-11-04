@@ -1,5 +1,9 @@
 # RaminDownloader
 
+The Avalonia desktop edition for Windows and Linux is described in the
+[desktop build and installation guide](packaging/desktop/README.md). The rest of
+this README covers the existing Windows ZIP edition.
+
 RaminDownloader is a Windows x64 desktop application for downloading web video or audio that you are authorized to save. It provides two local graphical interfaces around [yt-dlp](https://github.com/yt-dlp/yt-dlp), [FFmpeg](https://ffmpeg.org/), [FFprobe](https://ffmpeg.org/), and [Deno](https://deno.com/).
 
 - **RaminDownloader.exe**: a simple downloader for common video and MP3 downloads.

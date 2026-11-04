@@ -1,0 +1,80 @@
+name: Build desktop installers
+
+on:
+  push:
+    branches: [avalonia-desktop]
+  pull_request:
+    paths:
+      - 'src/RaminDownloader.Desktop/**'
+      - 'src/RaminDownloader/Models/**'
+      - 'src/RaminDownloader/Services/**'
+      - 'packaging/desktop/**'
+      - 'tests/RaminDownloader.Desktop.Smoke/**'
+      - '.github/workflows/build-desktop.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-2025, rid: win-x64 }
+          - { os: ubuntu-24.04, rid: linux-x64 }
+    runs-on: ${{ matrix.os }}
+    env:
+      DOTNET_NOLOGO: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Publish application with runtime
+        run: dotnet publish src/RaminDownloader.Desktop -c Release -r ${{ matrix.rid }} --self-contained true -o artifacts/app
+      - name: Stage verified media tools
+        run: python packaging/desktop/bundle_tools.py ${{ matrix.rid }} artifacts/app/tools
+      - name: Exercise media jobs with bundled tools
+        shell: pwsh
+        run: dotnet run --project tests/RaminDownloader.Desktop.Smoke -c Release "-p:BundledTools=${{ github.workspace }}/artifacts/app/tools"
+      - name: Build and inspect Debian package
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          bash packaging/desktop/build-deb.sh artifacts/app dist/ramin-downloader_1.0.0_amd64.deb
+          dpkg-deb --info dist/*.deb
+          sudo apt-get install -y ./dist/ramin-downloader_1.0.0_amd64.deb
+          bash packaging/desktop/smoke-tools.sh /opt/ramin-downloader/tools
+      - name: Build and check Windows installer
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install innosetup --yes --no-progress
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $compiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          & $compiler "/DPublishDir=$pwd\artifacts\app" "/DDistDir=$pwd\dist" "packaging\desktop\setup.iss"
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $installDir = "$env:RUNNER_TEMP\ramin-install"
+          $install = Start-Process (Resolve-Path "dist\RaminDownloader-Setup-win-x64.exe") -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/DIR=`"$installDir`"" -Wait -PassThru
+          if ($install.ExitCode) { exit $install.ExitCode }
+          if (!(Test-Path "$installDir\RaminDownloader.Desktop.exe")) { throw "Desktop executable missing after installation." }
+          foreach ($tool in @("yt-dlp", "ffmpeg", "ffprobe", "deno")) {
+            if (!(Test-Path "$installDir\tools\$tool.exe")) { throw "Bundled tool missing: $tool" }
+          }
+      - name: Generate installer checksum
+        shell: bash
+        run: cd dist && find . -maxdepth 1 -type f \( -name "*.exe" -o -name "*.deb" \) -exec sha256sum {} + > SHA256SUMS.txt && test -s SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RaminDownloader-${{ matrix.rid }}
+          path: dist/
+          if-no-files-found: error

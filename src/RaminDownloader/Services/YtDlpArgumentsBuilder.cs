@@ -9,7 +9,8 @@ public static class YtDlpArgumentsBuilder
         DownloadOptions options,
         string downloadDirectory,
         string toolsDirectory,
-        string? denoPath = null)
+        string? denoPath = null,
+        string? firefoxProfile = null)
     {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentException.ThrowIfNullOrWhiteSpace(downloadDirectory);
@@ -33,7 +34,7 @@ public static class YtDlpArgumentsBuilder
         if (options.UseFirefoxCookies)
         {
             arguments.Add("--cookies-from-browser");
-            arguments.Add("firefox");
+            arguments.Add(string.IsNullOrWhiteSpace(firefoxProfile) ? "firefox" : $"firefox:{firefoxProfile}");
         }
 
         if (options.Type == DownloadType.Video)
